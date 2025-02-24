@@ -5,10 +5,10 @@ import os
 import zipfile
 
 # If 4k.osz exist, delete it first
-if os.path.exists("exports/4k.msz"):
-    os.remove("exports/4k.msz")
+if os.path.exists("exports/4k.msp"):
+    os.remove("exports/4k.msp")
 # Create a zip file
-with zipfile.ZipFile("exports/4k.msz", "w") as zip:
+with zipfile.ZipFile("exports/4k.msp", "w") as zip:
     # Loop through the 4K folder
     for root, dirs, files in os.walk("4K"):
         for file in files:

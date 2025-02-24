@@ -2,35 +2,34 @@
 --Lua by dreamcat
 --Edited by Lzx
 function Init()
-    bool5462 = Game:IsVersionGE(5, 4, 62)
-    if (bool5462 == true) then
-        angle = Game:FieldMeta("Angle")
-        ss = Game:FieldMeta("Scale")
-    else
-        angle = Game:TrackAngle()
-        ss = Game:SceneScale()
-    end
+    -- Require version greater than 5.4.62
+    angle = Game:FieldMeta("Angle")
+    scale = Game:FieldMeta("Scale")
+
     width = Game:Width()
-    endtime = Game:AudioLength()
-    judgesize = Module:GetNumber("Judge Size (0.6-1.4)")
-    if (judgesize < 0.6 or judgesize > 1.4) then
-        judgesize = 1
+    audio_length = Game:AudioLength()
+
+    judge_size = Module:GetNumber("Judge Size (0.6-1.4)")
+    if (judge_size < 0.6 or judge_size > 1.4) then
+        judge_size = 1
     end
-    if (ss <= 0.95) then
-        ns = 0.9
-    elseif (ss > 0.95 and ss <= 1.05) then
-        ns = 1
-    elseif (ss > 1.05 and ss <= 1.15) then
-        ns = 1.1
+
+    if (scale <= 0.95) then
+        note_scale = 0.9
+    elseif (scale > 0.95 and scale <= 1.05) then
+        note_scale = 1
+    elseif (scale > 1.05 and scale <= 1.15) then
+        note_scale = 1.1
     else
-        ns = 1.2
+        note_scale = 1.2
     end
+
     if (width >= 1680) then
-        sw = 1
-        oh = 1080
+        scale_width = 1
+        original_height = 1080
     else
-        sw = width / 1680
-        oh = 1080 / sw
+        scale_width = width / 1680
+        original_height = 1080 / scale_width
     end
     if (width >= 1728) then
         sw1610 = 1
@@ -43,21 +42,28 @@ function Init()
     imgtrackbgtan = 632 / 866
     for i = 1, 21 do
         topheight[i] = 840 / (840 - topwidth[i] / 2) * 920
-        toptan[i] = 840 * ss / (topheight[i] + (oh / 2 - 380) * (1 - ss))
+        toptan[i] = 840 * scale / (topheight[i] + (original_height / 2 - 380) * (1 - scale))
     end
     trackbg = Module:Find("trackbg")
-    trackbg.Width = 2680 * ss * sw
-    trackbg.Height = 1608 * ss * sw * imgtrackbgtan / toptan[angle - 29]
-    trackbg.Y = (oh / 2 - 380) * ss * sw - trackbg.Height / 1608 * 601
+    trackbg.Width = 2680 * scale * scale_width
+    trackbg.Height = 1608 * scale * scale_width * imgtrackbgtan / toptan[angle - 29]
+    trackbg.Y = (original_height / 2 - 380) * scale * scale_width - trackbg.Height / 1608 * 601
     tracklight = {}
     for i = 1, 2 do
         tracklight[i] = Module:Find("tracklight" .. i)
-        tracklight[i].Width = 960.512 * ss * sw
-        tracklight[i].Height = 1260.672 * ss * sw * imgtrackbgtan / toptan[angle - 29]
+        tracklight[i].Width = 960.512 * scale * scale_width
+        tracklight[i].Height = 1260.672 * scale * scale_width * imgtrackbgtan / toptan[angle - 29]
         tracklight[i].Y = trackbg.Y
     end
-    tracklight[1].X = -379.488 * ss * sw
-    tracklight[2].X = 379.488 * ss * sw
+    tracklight[1].X = -379.488 * scale * scale_width
+    tracklight[2].X = 379.488 * scale * scale_width
+
+    -- Set the slow and fast indicator to transparent at the beginning
+    slow = Module:Find("slow")
+    fast = Module:Find("fast")
+    slow.Alpha = 0
+    fast.Alpha = 0
+
     mcombo = Module:Find("combo")
     mjudge = Module:Find("judge")
     hpbg = Module:Find("hpbg")
@@ -100,7 +106,7 @@ function Init()
     acc.Text = "0.00"
     progress.Y = -10 * sw1610
     progress.Width = 20
-    progress:DoWidth({ start = 0, finish = endtime, from = 20, to = width + 20 })
+    progress:DoWidth({ start = 0, finish = audio_length, from = 20, to = width + 20 })
     if (width >= 2120) then
         scorebg.X = 1060
         pause.X = 1010
@@ -109,33 +115,33 @@ function Init()
         acc.X = 960
     end
     perfecteffect = Module:Find("perfecteffect")
-    mhit = {}
-    for i = 1, 6 do
-        mhit[i] = Module:Find("hit" .. i)
-        mhit[i].RotateX = angle
-        mhit[i].Width = 56.9 / (ns ^ 0.5)
-        mhit[i].Height = 56.9 / (ns ^ 0.5)
-    end
+    -- mhit = {}
+    -- for i = 1, 6 do
+    --     mhit[i] = Module:Find("hit" .. i)
+    --     mhit[i].RotateX = angle
+    --     mhit[i].Width = 56.9 / (note_scale ^ 0.5)
+    --     mhit[i].Height = 56.9 / (note_scale ^ 0.5)
+    -- end
     mkey = {}
     for i = 1, 12 do
         mkey[i] = Module:Find("key" .. i)
-        mkey[i].Height = 6.48 / ns
-        mkey[i].Y = -0.9 / ns
+        mkey[i].Height = 6.48 / note_scale
+        mkey[i].Y = -0.9 / note_scale
     end
     trackbottom = Module:Find("trackbottom")
-    trackbottom.Height = 21.6 / ns
-    trackbottom.Y = -7.2 / ns
+    trackbottom.Height = 21.6 / note_scale
+    trackbottom.Y = -7.2 / note_scale
     mpress = {}
     for i = 1, 4 do
         mpress[i] = Module:Find("press" .. i)
-        mpress[i].Y = 3.51 / ns
-        mpress[i].Height = 90 / ns
+        mpress[i].Y = 3.51 / note_scale
+        mpress[i].Height = 90 / note_scale
     end
     trackline = {}
     for i = 1, 3 do
         trackline[i] = Module:Find("trackline" .. i)
-        trackline[i].Y = 2.7 / ns
-        trackline[i].Height = 360 / ns
+        trackline[i].Y = 2.7 / note_scale
+        trackline[i].Height = 360 / note_scale
     end
     bpm = {}
     p = Game:BpmCount()
@@ -196,19 +202,19 @@ function Init()
             end
         end
         if (modstr[i] == "Dash") then
-            rushvalue = 1.2
+            rush_value = 1.2
         elseif (modstr[i] == "Rush") then
-            rushvalue = 1.5
+            rush_value = 1.5
         elseif (modstr[i] == "Slow") then
-            rushvalue = 0.8
+            rush_value = 0.8
         else
-            rushvalue = 1
+            rush_value = 1
         end
     end
-    offblue.Width = 3 * bestvalue / rushvalue
-    offgreen.Width = 3 * coolvalue / rushvalue
-    offyellow.Width = 3 * goodvalue / rushvalue
-    offbar.Width = 3 * goodvalue / rushvalue + 40
+    offblue.Width = 3 * bestvalue / rush_value
+    offgreen.Width = 3 * coolvalue / rush_value
+    offyellow.Width = 3 * goodvalue / rush_value
+    offbar.Width = 3 * goodvalue / rush_value + 40
     soffani = { p1 = 0.6, p2 = 0, p3 = 0.4, p4 = 0 }
     inr = { 3, 3, 3, 3 }
 end
@@ -253,31 +259,32 @@ function OnHit()
     hitevent = Game:HitEvent()
     judge = hitevent:JudgeResult()
     if (judge ~= 4) then
-        mcombo:DoMoveY({ start = time, finish = time + 100 * rushvalue, from = 120, to = 150, ease = 2 })
+        mcombo:DoMoveY({ start = time, finish = time + 100 * rush_value, from = 120, to = 150, ease = 2 })
     end
     if (judge == 1 or judge == 2 or judge == 3 or judge == 4) then
         if (judge == 1) then
             perfecteffect:DoResize({
                 start = time,
-                finish = time + 100 * rushvalue,
-                from = 588 * judgesize,
+                finish = time + 100 * rush_value,
+                from = 588 * judge_size,
                 to = 840 *
-                    judgesize
-            }, { start = time, finish = time + 100 * rushvalue, from = 196.7 * judgesize, to = 281 * judgesize })
-            perfecteffect:DoAlpha({ start = time, finish = time + 400 * rushvalue, from = 100, to = 0, custom = { p1 = 0.43, p2 = 0, p3 = 0.17, p4 = -0.11 } })
+                    judge_size
+            }, { start = time, finish = time + 100 * rush_value, from = 196.7 * judge_size, to = 281 * judge_size })
+            perfecteffect:DoAlpha({ start = time, finish = time + 400 * rush_value, from = 100, to = 0, custom = { p1 = 0.43, p2 = 0, p3 = 0.17, p4 = -0.11 } })
         end
         mjudge:DoResize(
-            { start = time, finish = time + 100 * rushvalue, from = 254.8 * judgesize, to = 364 * judgesize },
-            { start = time, finish = time + 100, from = 44.8 * judgesize, to = 64 * judgesize })
-        mjudge:DoAlpha({ start = time, finish = time + 600 * rushvalue, from = 100, to = 0, custom = { p1 = 0.86, p2 = 0, p3 = 0.59, p4 = -0.11 } })
+            { start = time, finish = time + 100 * rush_value, from = 254.8 * judge_size, to = 364 * judge_size },
+            { start = time, finish = time + 100, from = 44.8 * judge_size, to = 64 * judge_size })
+        mjudge:DoAlpha({ start = time, finish = time + 600 * rush_value, from = 100, to = 0, custom = { p1 = 0.86, p2 = 0, p3 = 0.59, p4 = -0.11 } })
     end
     Indicator()
+    animation_early_or_late()
     if (judge == 1) then
         soffp = Module:Shadow(offp, 3000)
-        soffp.X = hitevent:Offset() * -1.5 / rushvalue
+        soffp.X = hitevent:Offset() * -1.5 / rush_value
         soffp:DoAlpha({
             start = time,
-            finish = time + 3000 * rushvalue,
+            finish = time + 3000 * rush_value,
             from = 100 - math.abs(hitevent:Offset()) / 2,
             to = 0,
             custom =
@@ -286,10 +293,10 @@ function OnHit()
     elseif (judge == 2) then
         soffg = Module:Shadow(offg, 3000)
         cooloffset = hitevent:Offset()
-        soffg.X = cooloffset * -1.5 / rushvalue
+        soffg.X = cooloffset * -1.5 / rush_value
         soffg:DoAlpha({
             start = time,
-            finish = time + 1000 * rushvalue,
+            finish = time + 1000 * rush_value,
             from = 100 - math.abs(cooloffset) / 2,
             to = 0,
             custom =
@@ -308,9 +315,9 @@ function OnHit()
                         bestvalue = bestvalue - 9
                         coolvalue = coolvalue - 9
                         goodvalue = goodvalue - 20
-                        offblue.Width = 3 * bestvalue / rushvalue
-                        offgreen.Width = 3 * coolvalue / rushvalue
-                        offyellow.Width = 3 * goodvalue / rushvalue
+                        offblue.Width = 3 * bestvalue / rush_value
+                        offgreen.Width = 3 * coolvalue / rush_value
+                        offyellow.Width = 3 * goodvalue / rush_value
                     end
                 end
             end
@@ -318,10 +325,10 @@ function OnHit()
     elseif (judge == 3) then
         soffm = Module:Shadow(offm, 3000)
         goodoffset = hitevent:Offset()
-        soffm.X = goodoffset * -1.5 / rushvalue
+        soffm.X = goodoffset * -1.5 / rush_value
         soffm:DoAlpha({
             start = time,
-            finish = time + 1000 * rushvalue,
+            finish = time + 1000 * rush_value,
             from = 100 - math.abs(goodoffset) / 2,
             to = 0,
             custom =
@@ -340,9 +347,9 @@ function OnHit()
                         bestvalue = bestvalue - 9
                         coolvalue = coolvalue - 9
                         goodvalue = goodvalue - 20
-                        offblue.Width = 3 * bestvalue / rushvalue
-                        offgreen.Width = 3 * coolvalue / rushvalue
-                        offyellow.Width = 3 * goodvalue / rushvalue
+                        offblue.Width = 3 * bestvalue / rush_value
+                        offgreen.Width = 3 * coolvalue / rush_value
+                        offyellow.Width = 3 * goodvalue / rush_value
                     end
                 end
             end
@@ -352,8 +359,19 @@ end
 
 function Indicator()
     if (judge == 1 or judge == 2 or judge == 3) then
-        indicvalue = hitevent:Offset() * -1.5 / rushvalue
+        indicvalue = hitevent:Offset() * -1.5 / rush_value
         dicx = mindicator.X
         mindicator:DoMoveX({ start = time, finish = time + 500, from = dicx, to = indicvalue, ease = 2 })
+    end
+end
+
+function animation_early_or_late()
+    if (judge == 2 or judge == 3) then
+        local offset = hitevent:Offset() -- offset > 0: early; offset < 0: late
+        if (offset < 0) then
+            slow:DoAlpha({ start = time, finish = time + 300, from = 100, to = 0 });
+        else
+            fast:DoAlpha({ start = time, finish = time + 300, from = 100, to = 0 });
+        end
     end
 end
