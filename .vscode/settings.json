@@ -1,3 +1,4 @@
 {
-  "Lua.diagnostics.globals": ["Game", "Module"]
+  "Lua.diagnostics.globals": ["Game", "Module"],
+  "cSpell.words": ["dreamcat", "Malody"]
 }

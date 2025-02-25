@@ -275,9 +275,29 @@ function OnInput()
     end
 end
 
+local function animation_early_or_late(judge_result, offset, time)
+    if (judge_result == 2 or judge_result == 3) then
+        -- local offset = hit_event:Offset() -- offset > 0: early; offset < 0: late
+        if (offset < 0) then
+            slow:DoAlpha({ start = time, finish = time + 300, from = 100, to = 0 });
+        else
+            fast:DoAlpha({ start = time, finish = time + 300, from = 100, to = 0 });
+        end
+    end
+end
+
+local function animation_offset_indicator(judge_result, offset, rush_value, time, offset_indicator)
+    if (judge_result == 1 or judge_result == 2 or judge_result == 3) then
+        indicvalue = offset * -1.5 / rush_value
+        dicx = offset_indicator.X
+        offset_indicator:DoMoveX({ start = time, finish = time + 500, from = dicx, to = indicvalue, ease = 2 })
+    end
+end
+
 function OnHit()
     time = Game:Time()
     hit_event = Game:HitEvent()
+    local offset = hit_event:Offset()
 
     -- judge_result
     --   0: Ignore
@@ -305,10 +325,10 @@ function OnHit()
         mjudge:DoAlpha({ start = time, finish = time + 600 * rush_value, from = 100, to = 0, custom = { p1 = 0.86, p2 = 0, p3 = 0.59, p4 = -0.11 } })
     end
 
-    Animation_offset_indicator()
-    Animation_early_or_late()
+    animation_offset_indicator(judge_result, offset, rush_value, time, offset_indicator)
 
-    local offset = hit_event:Offset()
+    animation_early_or_late(judge_result, offset, time)
+
     if (judge_result == 1) then
         -- Best
         soffp = Module:Shadow(offset_perfect, 3000)
@@ -373,34 +393,15 @@ function OnHit()
                     end
                     if (math.abs(offset) < goodpro) then
                         projudge = 1
-                        value_best = value_best - 9
-                        value_cool = value_cool - 9
-                        value_good = value_good - 20
+                        local value_best = value_best - 9
+                        local value_cool = value_cool - 9
+                        local value_good = value_good - 20
                         offset_blue.Width = 3 * value_best / rush_value
                         offset_green.Width = 3 * value_cool / rush_value
                         offset_yellow.Width = 3 * value_good / rush_value
                     end
                 end
             end
-        end
-    end
-end
-
-function Animation_offset_indicator()
-    if (judge_result == 1 or judge_result == 2 or judge_result == 3) then
-        indicvalue = hit_event:Offset() * -1.5 / rush_value
-        dicx = offset_indicator.X
-        offset_indicator:DoMoveX({ start = time, finish = time + 500, from = dicx, to = indicvalue, ease = 2 })
-    end
-end
-
-function Animation_early_or_late()
-    if (judge_result == 2 or judge_result == 3) then
-        local offset = hit_event:Offset() -- offset > 0: early; offset < 0: late
-        if (offset < 0) then
-            slow:DoAlpha({ start = time, finish = time + 300, from = 100, to = 0 });
-        else
-            fast:DoAlpha({ start = time, finish = time + 300, from = 100, to = 0 });
         end
     end
 end
