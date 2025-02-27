@@ -1,6 +1,11 @@
 --Rhythm Master Skin for Malody V
 --Lua by dreamcat
 --Edited by Lzx
+
+-- Word Explanation:
+--  "Composer": the editor of the skin in Malody V
+
+-- 皮肤初始化时被调用
 function Init()
     -- Require version greater than 5.4.62
     angle = Game:FieldMeta("Angle")
@@ -136,11 +141,19 @@ function Init()
     --     mhit[i].Height = 56.9 / (note_scale ^ 0.5)
     -- end
 
-    mkey = {}
+    -- key 1-4: unpressed key skins
+    -- key 5-8: pressed key skins (Controlled in Composer)
+    -- key 9-12: pressed key skins (Used for the fade-out effect) (key 1 corresponds to key 9)
+    Module_keys = {}
     for i = 1, 12 do
-        mkey[i] = Module:Find("key" .. i)
-        mkey[i].Height = 6.48 / note_scale
-        mkey[i].Y = -0.9 / note_scale
+        local key = Module:Find("key" .. i)
+        -- Set the size of all keys
+        key.Height = 6.48 / note_scale
+        key.Y = -0.9 / note_scale
+        -- Since we only use key 9-12, we directly store them in 1-4 of Module_keys
+        if (i >= 9) then
+            Module_keys[i - 8] = key
+        end
     end
 
     trackbottom = Module:Find("trackbottom")
@@ -230,17 +243,18 @@ function Init()
     offset_yellow.Width = 3 * value_good / rush_value
     offset_bar.Width = 3 * value_good / rush_value + 40
     soffani = { p1 = 0.6, p2 = 0, p3 = 0.4, p4 = 0 }
-    inr = { 3, 3, 3, 3 }
+    -- inr = { 3, 3, 3, 3 }
 end
 
 function OnRetry()
-    inr = { 3, 3, 3, 3 }
+    -- inr = { 3, 3, 3, 3 }
     accvalue = 0
     luaaccvalue = 0
     acc.Text = "0.00"
     offset_indicator.X = 0
 end
 
+-- 每一帧调用。函数为空时删除函数
 function Update()
     luaaccvalue = tonumber(tonumber(string.match(luaacc.Text, "[%d.]+")))
     if (accvalue ~= luaaccvalue) then
@@ -249,22 +263,16 @@ function Update()
     end
 end
 
+-- 玩家操作时调用，按键，抬起等。函数为空时删除函数
+-- 在Composer中不会被调用
 function OnInput()
-    input_event = Game:InputEvent()
-    input_x = input_event:HitX()
-    input_type = input_event:Type()
-    for i = 1, 4 do
-        if (input_x == i) then
-            inr[i] = input_type
-        end
-    end
-    for i = 1, 4 do
-        if (input_x == i) then
-            if (inr[i] == 3) then
-                local time = Game:Time()
-                mkey[i + 8]:DoAlpha({ start = time, finish = time + 450, from = 100, to = 0 })
-            end
-        end
+    local input_event = Game:InputEvent()
+    local input_x = input_event:HitX()
+    local input_type = input_event:Type()
+
+    local time = Game:Time()
+    if (input_type == 3) then -- Release the key
+        Module_keys[input_x]:DoAlpha({ start = time, finish = time + 450, from = 100, to = 0 })
     end
 end
 
@@ -287,6 +295,8 @@ local function animation_offset_indicator(judge_result, offset, rush_value, time
     end
 end
 
+-- 玩家击打时调用。函数为空时删除函数
+-- 在Composer中不会被调用
 function OnHit()
     local time = Game:Time()
     local hit_event = Game:HitEvent()
