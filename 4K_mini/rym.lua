@@ -74,9 +74,9 @@ function Init()
 
     combo = Module:Find("combo")
     mjudge = Module:Find("judge")
-    luaacc = Module:Find("luaacc")
-    accvalue = 0
-    luaaccvalue = 0
+    -- luaacc = Module:Find("luaacc")
+    -- accvalue = 0
+    -- luaaccvalue = 0
 
     hpbg = Module:Find("hpbg")
     hpbg.Width = width
@@ -112,12 +112,12 @@ function Init()
     accbg.X = width / 2 - 380 * sw1610
     accbg.Y = -130 * sw1610
 
-    acc = Module:Find("acc")
-    acc.ScaleX = sw1610
-    acc.ScaleY = sw1610
-    acc.X = width / 2 - 100 * sw1610
-    acc.Y = -172 * sw1610
-    acc.Text = "0.00"
+    -- acc = Module:Find("acc")
+    -- acc.ScaleX = sw1610
+    -- acc.ScaleY = sw1610
+    -- acc.X = width / 2 - 100 * sw1610
+    -- acc.Y = -172 * sw1610
+    -- acc.Text = "0.00"
 
     progress = Module:Find("progress")
     progress.Y = -10 * sw1610
@@ -129,7 +129,7 @@ function Init()
         pause.X = 1010
         score.X = 940
         accbg.X = 680
-        acc.X = 960
+        -- acc.X = 960
     end
 
     perfect_effect = Module:Find("perfecteffect")
@@ -248,19 +248,19 @@ end
 
 function OnRetry()
     -- inr = { 3, 3, 3, 3 }
-    accvalue = 0
-    luaaccvalue = 0
-    acc.Text = "0.00"
+    -- accvalue = 0
+    -- luaaccvalue = 0
+    -- acc.Text = "0.00"
     offset_indicator.X = 0
 end
 
 -- 每一帧调用。函数为空时删除函数
 function Update()
-    luaaccvalue = tonumber(tonumber(string.match(luaacc.Text, "[%d.]+")))
-    if (accvalue ~= luaaccvalue) then
-        accvalue = luaaccvalue
-        acc.Text = string.format("%.2f", accvalue)
-    end
+    -- luaaccvalue = tonumber(tonumber(string.match(luaacc.Text, "[%d.]+")))
+    -- if (accvalue ~= luaaccvalue) then
+    --     accvalue = luaaccvalue
+    --     acc.Text = string.format("%.2f", accvalue)
+    -- end
 end
 
 -- 玩家操作时调用，按键，抬起等。函数为空时删除函数
@@ -310,9 +310,9 @@ function OnHit()
     --   4: Miss
     local judge_result = hit_event:JudgeResult()
 
-    if (judge_result ~= 4) then
-        combo:DoMoveY({ start = time, finish = time + 100 * rush_value, from = 120, to = 150, ease = 2 })
-    end
+    -- if (judge_result ~= 4) then
+    --     combo:DoMoveY({ start = time, finish = time + 100 * rush_value, from = 120, to = 150, ease = 2 })
+    -- end
 
     if (judge_result == 1 or judge_result == 2 or judge_result == 3 or judge_result == 4) then
         if (judge_result == 1) then
