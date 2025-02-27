@@ -288,8 +288,8 @@ local function animation_offset_indicator(judge_result, offset, rush_value, time
 end
 
 function OnHit()
-    time = Game:Time()
-    hit_event = Game:HitEvent()
+    local time = Game:Time()
+    local hit_event = Game:HitEvent()
     local offset = hit_event:Offset()
 
     -- judge_result
@@ -298,7 +298,7 @@ function OnHit()
     --   2: Cool
     --   3: Good
     --   4: Miss
-    judge_result = hit_event:JudgeResult()
+    local judge_result = hit_event:JudgeResult()
 
     if (judge_result ~= 4) then
         combo:DoMoveY({ start = time, finish = time + 100 * rush_value, from = 120, to = 150, ease = 2 })
@@ -322,76 +322,74 @@ function OnHit()
 
     animation_early_or_late(judge_result, offset, time)
 
-    if (judge_result == 1) then
-        -- Best
-        soffp = Module:Shadow(offset_perfect, 3000)
-        soffp.X = offset * -1.5 / rush_value
-        soffp:DoAlpha({
-            start = time,
-            finish = time + 3000 * rush_value,
-            from = 100 - math.abs(offset) / 2,
-            to = 0,
-            custom = soffani
-        })
-    elseif (judge_result == 2) then
-        -- Cool
-        soffg = Module:Shadow(offset_cool, 3000)
-        soffg.X = offset * -1.5 / rush_value
-        soffg:DoAlpha({
-            start = time,
-            finish = time + 1000 * rush_value,
-            from = 100 - math.abs(offset) / 2,
-            to = 0,
-            custom = soffani
-        })
-        if (projudge ~= 1) then
-            for i = 1, 5 do
-                if (judge_type_index == i) then
-                    if (i <= 3) then
-                        coolpro = 20 + 8 * i
-                    else
-                        coolpro = 44 + 10 * (i - 3)
-                    end
-                    if (math.abs(offset) < coolpro) then
-                        projudge = 1
-                        value_best = value_best - 9
-                        value_cool = value_cool - 9
-                        value_good = value_good - 20
-                        offset_blue.Width = 3 * value_best / rush_value
-                        offset_green.Width = 3 * value_cool / rush_value
-                        offset_yellow.Width = 3 * value_good / rush_value
+    if (judge_result == 1 or judge_result == 2 or judge_result == 3) then
+        local shadow_types = { offset_perfect, offset_cool, offset_good } -- Indexed by judge_result
+        local offset_shadow = Module:Shadow(shadow_types[judge_result], 3000)
+        offset_shadow.X = offset * -1.5 / rush_value
+        if (judge_result == 1) then
+            -- Best
+            offset_shadow:DoAlpha({
+                start = time,
+                finish = time + 3000 * rush_value,
+                from = 100 - math.abs(offset) / 2,
+                to = 0,
+                custom = soffani
+            })
+        elseif (judge_result == 2) then
+            -- Cool
+            offset_shadow:DoAlpha({
+                start = time,
+                finish = time + 1000 * rush_value,
+                from = 100 - math.abs(offset) / 2,
+                to = 0,
+                custom = soffani
+            })
+            if (projudge ~= 1) then
+                for i = 1, 5 do
+                    if (judge_type_index == i) then
+                        if (i <= 3) then
+                            coolpro = 20 + 8 * i
+                        else
+                            coolpro = 44 + 10 * (i - 3)
+                        end
+                        if (math.abs(offset) < coolpro) then
+                            projudge = 1
+                            local value_best = value_best - 9
+                            local value_cool = value_cool - 9
+                            local value_good = value_good - 20
+                            offset_blue.Width = 3 * value_best / rush_value
+                            offset_green.Width = 3 * value_cool / rush_value
+                            offset_yellow.Width = 3 * value_good / rush_value
+                        end
                     end
                 end
             end
-        end
-    elseif (judge_result == 3) then
-        -- Good
-        soffm = Module:Shadow(offset_good, 3000)
-        -- goodoffset = hit_event:Offset()
-        soffm.X = offset * -1.5 / rush_value
-        soffm:DoAlpha({
-            start = time,
-            finish = time + 1000 * rush_value,
-            from = 100 - math.abs(offset) / 2,
-            to = 0,
-            custom = soffani
-        })
-        if (projudge ~= 1) then
-            for i = 1, 5 do
-                if (judge_type_index == i) then
-                    if (i <= 3) then
-                        goodpro = 60 + 8 * i
-                    else
-                        goodpro = 84 + 10 * (i - 3)
-                    end
-                    if (math.abs(offset) < goodpro) then
-                        projudge = 1
-                        local value_best = value_best - 9
-                        local value_cool = value_cool - 9
-                        local value_good = value_good - 20
-                        offset_blue.Width = 3 * value_best / rush_value
-                        offset_green.Width = 3 * value_cool / rush_value
-                        offset_yellow.Width = 3 * value_good / rush_value
+        elseif (judge_result == 3) then
+            -- Good
+            offset_shadow:DoAlpha({
+                start = time,
+                finish = time + 1000 * rush_value,
+                from = 100 - math.abs(offset) / 2,
+                to = 0,
+                custom = soffani
+            })
+            if (projudge ~= 1) then
+                for i = 1, 5 do
+                    if (judge_type_index == i) then
+                        if (i <= 3) then
+                            goodpro = 60 + 8 * i
+                        else
+                            goodpro = 84 + 10 * (i - 3)
+                        end
+                        if (math.abs(offset) < goodpro) then
+                            projudge = 1
+                            local value_best = value_best - 9
+                            local value_cool = value_cool - 9
+                            local value_good = value_good - 20
+                            offset_blue.Width = 3 * value_best / rush_value
+                            offset_green.Width = 3 * value_cool / rush_value
+                            offset_yellow.Width = 3 * value_good / rush_value
+                        end
                     end
                 end
             end
