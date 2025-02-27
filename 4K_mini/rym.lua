@@ -8,7 +8,7 @@
 -- 皮肤初始化时被调用
 function Init()
     -- Require version greater than 5.4.62
-    angle = Game:FieldMeta("Angle")
+    local angle = Game:FieldMeta("Angle")
 
     width = Game:Width()
     audio_length = Game:AudioLength()
