@@ -147,13 +147,6 @@ function Init()
     trackbottom.Height = 21.6 / note_scale
     trackbottom.Y = -7.2 / note_scale
 
-    mpress = {}
-    for i = 1, 4 do
-        mpress[i] = Module:Find("press" .. i)
-        mpress[i].Y = 3.51 / note_scale
-        mpress[i].Height = 90 / note_scale
-    end
-
     track_line = {}
     for i = 1, 3 do
         track_line[i] = Module:Find("trackline" .. i)
