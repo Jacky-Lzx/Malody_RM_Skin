@@ -13,12 +13,8 @@ function Init()
     local width = Game:Width()
     local audio_length = Game:AudioLength()
 
-    judge_size = Module:GetNumber("Judge Size (0.6-1.4)")
-    if (judge_size < 0.6 or judge_size > 1.4) then
-        judge_size = 1
-    end
-
-    scale = Game:FieldMeta("Scale")
+    local scale = Game:FieldMeta("Scale")
+    local note_scale
     if (scale <= 0.95) then
         note_scale = 0.9
     elseif (scale > 0.95 and scale <= 1.05) then
@@ -29,6 +25,8 @@ function Init()
         note_scale = 1.2
     end
 
+    local scale_width
+    local original_height
     if (width >= 1680) then
         scale_width = 1
         original_height = 1080
@@ -37,109 +35,75 @@ function Init()
         original_height = 1080 / scale_width
     end
 
+    local sw1610
     if (width >= 1728) then
         sw1610 = 1
     else
         sw1610 = width / 1728
     end
 
-    topwidth = { 760, 732, 704, 674, 646, 616, 588, 558, 528, 498, 468, 438, 408, 376, 346, 314, 282, 250, 218, 184, 150 }
-    topheight = {}
-    toptan = {}
-    imgtrackbgtan = 632 / 866
+    local topwidth = { 760, 732, 704, 674, 646, 616, 588, 558, 528, 498, 468, 438, 408, 376, 346, 314, 282, 250, 218, 184, 150 }
+    local topheight = {}
+    local toptan = {}
+    local imgtrackbgtan = 632 / 866
     for i = 1, 21 do
         topheight[i] = 840 / (840 - topwidth[i] / 2) * 920
         toptan[i] = 840 * scale / (topheight[i] + (original_height / 2 - 380) * (1 - scale))
     end
-    trackbg = Module:Find("trackbg")
+
+    local trackbg = Module:Find("trackbg")
     trackbg.Width = 2680 * scale * scale_width
     trackbg.Height = 1608 * scale * scale_width * imgtrackbgtan / toptan[angle - 29]
     trackbg.Y = (original_height / 2 - 380) * scale * scale_width - trackbg.Height / 1608 * 601
 
-    -- tracklight = {}
-    -- for i = 1, 2 do
-    --     tracklight[i] = Module:Find("tracklight" .. i)
-    --     tracklight[i].Width = 960.512 * scale * scale_width
-    --     tracklight[i].Height = 1260.672 * scale * scale_width * imgtrackbgtan / toptan[angle - 29]
-    --     tracklight[i].Y = trackbg.Y
-    -- end
-    -- tracklight[1].X = -379.488 * scale * scale_width
-    -- tracklight[2].X = 379.488 * scale * scale_width
+    Judge_size = Module:GetNumber("Judge Size (0.6-1.4)")
+    if (Judge_size < 0.6 or Judge_size > 1.4) then Judge_size = 1 end
 
-    -- Set the slow and fast indicator to transparent at the beginning
-    slow = Module:Find("slow")
-    fast = Module:Find("fast")
-    slow.Alpha = 0
-    fast.Alpha = 0
+    local hp_background = Module:Find("hpbg")
+    hp_background.Width = width
+    hp_background.Height = 135 * sw1610
 
-    combo = Module:Find("combo")
-    mjudge = Module:Find("judge")
-    -- luaacc = Module:Find("luaacc")
-    -- accvalue = 0
-    -- luaaccvalue = 0
-
-    hpbg = Module:Find("hpbg")
-    hpbg.Width = width
-    hpbg.Height = 135 * sw1610
-
-    hp = Module:Find("hp")
+    local hp = Module:Find("hp")
     hp.Width = 498.1 * sw1610
     hp.Height = 47.8 * sw1610
     hp.X = 35 * sw1610
     hp.Y = -60 * sw1610
 
-    scorebg = Module:Find("scorebg")
-    scorebg.Width = 529.9 * sw1610
-    scorebg.Height = 104 * sw1610
-    scorebg.X = width / 2
-    scorebg.Y = -29 * sw1610
+    local score_background = Module:Find("scorebg")
+    score_background.Width = 529.9 * sw1610
+    score_background.Height = 104 * sw1610
+    score_background.X = width / 2
+    score_background.Y = -29 * sw1610
 
-    pause = Module:Find("pause")
+    local pause = Module:Find("pause")
     pause.Width = 34 * sw1610
     pause.Height = 41 * sw1610
     pause.X = width / 2 - 50 * sw1610
     pause.Y = -80 * sw1610
 
-    score = Module:Find("score")
+    local score = Module:Find("score")
     score.ScaleX = sw1610
     score.ScaleY = sw1610
     score.X = width / 2 - 120 * sw1610
     score.Y = -79 * sw1610
 
-    accbg = Module:Find("accbg")
-    accbg.Width = 600 * sw1610
-    accbg.Height = 84 * sw1610
-    accbg.X = width / 2 - 380 * sw1610
-    accbg.Y = -130 * sw1610
+    local acc_background = Module:Find("accbg")
+    acc_background.Width = 600 * sw1610
+    acc_background.Height = 84 * sw1610
+    acc_background.X = width / 2 - 380 * sw1610
+    acc_background.Y = -130 * sw1610
 
-    -- acc = Module:Find("acc")
-    -- acc.ScaleX = sw1610
-    -- acc.ScaleY = sw1610
-    -- acc.X = width / 2 - 100 * sw1610
-    -- acc.Y = -172 * sw1610
-    -- acc.Text = "0.00"
-
-    progress = Module:Find("progress")
+    local progress = Module:Find("progress")
     progress.Y = -10 * sw1610
     progress.Width = 20
     progress:DoWidth({ start = 0, finish = audio_length, from = 20, to = width + 20 })
 
     if (width >= 2120) then
-        scorebg.X = 1060
+        score_background.X = 1060
         pause.X = 1010
         score.X = 940
-        accbg.X = 680
-        -- acc.X = 960
+        acc_background.X = 680
     end
-
-    perfect_effect = Module:Find("perfecteffect")
-    -- mhit = {}
-    -- for i = 1, 6 do
-    --     mhit[i] = Module:Find("hit" .. i)
-    --     mhit[i].RotateX = angle
-    --     mhit[i].Width = 56.9 / (note_scale ^ 0.5)
-    --     mhit[i].Height = 56.9 / (note_scale ^ 0.5)
-    -- end
 
     -- key 1-4: unpressed key skins
     -- key 5-8: pressed key skins (Controlled in Composer)
@@ -156,19 +120,19 @@ function Init()
         end
     end
 
-    trackbottom = Module:Find("trackbottom")
+    local trackbottom = Module:Find("trackbottom")
     trackbottom.Height = 21.6 / note_scale
     trackbottom.Y = -7.2 / note_scale
 
-    track_line = {}
+    local track_line = {}
     for i = 1, 3 do
         track_line[i] = Module:Find("trackline" .. i)
         track_line[i].Y = 2.7 / note_scale
         track_line[i].Height = 360 / note_scale
     end
 
-    bpm = {}
-    p = Game:BpmCount()
+    local bpm = {}
+    local p = Game:BpmCount()
     for i = 1, p do
         bpm[i] = Game:BpmAt(i - 1)
     end
@@ -182,40 +146,30 @@ function Init()
             repeats = (bpm[i + 1].time - bpm[i].time) /
                 60000 * bpm[i].bpm // 1 + 1
         })
-        -- for k = 1, 2 do
-        --     tracklight[k]:DoAlpha({
-        --         start = bpm[i].time,
-        --         finish = bpm[i].time + 60000 / bpm[i].bpm,
-        --         from = 100,
-        --         to = 0,
-        --         repeats = (bpm[i + 1].time - bpm[i].time) /
-        --             60000 * bpm[i].bpm // 1 + 1
-        --     })
-        -- end
     end
 
     Offset_indicator = Module:Find("indicator")
-    offset_blue = Module:Find("offblue")
-    offset_green = Module:Find("offgreen")
-    offset_yellow = Module:Find("offyellow")
-    Offset_perfect = Module:Find("offp")
-    Offset_cool = Module:Find("offg")
-    Offset_good = Module:Find("offm")
-    offset_bar = Module:Find("offbar")
+    local offset_blue = Module:Find("offblue")
+    local offset_green = Module:Find("offgreen")
+    local offset_yellow = Module:Find("offyellow")
+    local offset_bar = Module:Find("offbar")
 
-    mod = Module:Find("mod")
-    modtext = mod.Text
-    mod_str = {}
-    judge_type = { "HARD", "NORMAL+", "NORMAL", "EASY+", "EASY" }
-    judge_type_index = 0
-    projudge = 0
+    local mod = Module:Find("mod")
+    local modtext = mod.Text
+    local mod_str = {}
     for v in string.gmatch(modtext, "[%a+]+") do
         table.insert(mod_str, v)
     end
+
+    local judge_type = { "HARD", "NORMAL+", "NORMAL", "EASY+", "EASY" }
+
+    local value_best
+    local value_cool
+    local value_good
+    Rush_value = 1.0
     for i = 1, #mod_str do
         for k = 1, #judge_type do
             if (mod_str[i] == judge_type[k]) then
-                judge_type_index = k
                 if (k <= 3) then
                     -- These values are inconsistent with the values in https://zh.moegirl.org.cn/zh/Malody
                     -- But it is consistent with the offset value in the game (my experiment)
@@ -231,20 +185,20 @@ function Init()
         end
 
         if (mod_str[i] == "Dash") then
-            rush_value = 1.2
+            Rush_value = 1.2
         elseif (mod_str[i] == "Rush") then
-            rush_value = 1.5
+            Rush_value = 1.5
         elseif (mod_str[i] == "Slow") then
-            rush_value = 0.8
+            Rush_value = 0.8
         else
-            rush_value = 1
+            Rush_value = 1
         end
     end
 
-    offset_blue.Width = 3 * value_best / rush_value
-    offset_green.Width = 3 * value_cool / rush_value
-    offset_yellow.Width = 3 * value_good / rush_value
-    offset_bar.Width = 3 * value_good / rush_value + 40
+    offset_blue.Width = 3 * value_best / Rush_value
+    offset_green.Width = 3 * value_cool / Rush_value
+    offset_yellow.Width = 3 * value_good / Rush_value
+    offset_bar.Width = 3 * value_good / Rush_value + 40
 end
 
 function OnRetry()
@@ -252,11 +206,6 @@ end
 
 -- 每一帧调用。函数为空时删除函数
 function Update()
-    -- luaaccvalue = tonumber(tonumber(string.match(luaacc.Text, "[%d.]+")))
-    -- if (accvalue ~= luaaccvalue) then
-    --     accvalue = luaaccvalue
-    --     acc.Text = string.format("%.2f", accvalue)
-    -- end
 end
 
 -- 玩家操作时调用，按键，抬起等。函数为空时删除函数
@@ -265,8 +214,11 @@ function OnInput()
     local input_event = Game:InputEvent()
     local input_x = input_event:HitX()
     local input_type = input_event:Type()
-
     local time = Game:Time()
+
+    -- Pressing event is handled in the Composer
+
+    -- Releasing event is handled here
     if (input_type == 3) then -- Release the key
         Module_keys[input_x]:DoAlpha({ start = time, finish = time + 450, from = 100, to = 0 })
     end
@@ -277,7 +229,7 @@ end
 function OnHit()
     local time = Game:Time()
     local hit_event = Game:HitEvent()
-    local offset = hit_event:Offset()
+    local offset = hit_event:Offset() -- offset > 0: early; offset < 0: late
     -- judge_result
     --   0: Ignore
     --   1: Best
@@ -289,33 +241,39 @@ function OnHit()
     -- Animation: judge
     if (judge_result == 1 or judge_result == 2 or judge_result == 3 or judge_result == 4) then
         if (judge_result == 1) then
+            local perfect_effect = Module:Find("perfecteffect")
             perfect_effect:DoResize(
-                { start = time, finish = time + 100 * rush_value, from = 588 * judge_size, to = 840 * judge_size },
-                { start = time, finish = time + 100 * rush_value, from = 196.7 * judge_size, to = 281 * judge_size }
+                { start = time, finish = time + 100 * Rush_value, from = 588 * Judge_size, to = 840 * Judge_size },
+                { start = time, finish = time + 100 * Rush_value, from = 196.7 * Judge_size, to = 281 * Judge_size }
             )
-            perfect_effect:DoAlpha({ start = time, finish = time + 400 * rush_value, from = 100, to = 0, custom = { p1 = 0.43, p2 = 0, p3 = 0.17, p4 = -0.11 } })
+            perfect_effect:DoAlpha({ start = time, finish = time + 400 * Rush_value, from = 100, to = 0, custom = { p1 = 0.43, p2 = 0, p3 = 0.17, p4 = -0.11 } })
         end
-        mjudge:DoResize(
-            { start = time, finish = time + 100 * rush_value, from = 254.8 * judge_size, to = 364 * judge_size },
-            { start = time, finish = time + 100, from = 44.8 * judge_size, to = 64 * judge_size })
-        mjudge:DoAlpha({ start = time, finish = time + 600 * rush_value, from = 100, to = 0, custom = { p1 = 0.86, p2 = 0, p3 = 0.59, p4 = -0.11 } })
+
+        local module_judge = Module:Find("judge")
+        module_judge:DoResize(
+            { start = time, finish = time + 100 * Rush_value, from = 254.8 * Judge_size, to = 364 * Judge_size },
+            { start = time, finish = time + 100, from = 44.8 * Judge_size, to = 64 * Judge_size })
+        module_judge:DoAlpha({ start = time, finish = time + 600 * Rush_value, from = 100, to = 0, custom = { p1 = 0.86, p2 = 0, p3 = 0.59, p4 = -0.11 } })
     end
 
     -- Animation: early or late
     if (judge_result == 2 or judge_result == 3) then
-        -- local offset = hit_event:Offset() -- offset > 0: early; offset < 0: late
         if (offset < 0) then
-            slow:DoAlpha({ start = time, finish = time + 300, from = 100, to = 0 });
+            Module:Find("slow"):DoAlpha({ start = time, finish = time + 300, from = 100, to = 0 });
         else
-            fast:DoAlpha({ start = time, finish = time + 300, from = 100, to = 0 });
+            Module:Find("fast"):DoAlpha({ start = time, finish = time + 300, from = 100, to = 0 });
         end
     end
 
     -- Animation: offset
     if (judge_result == 1 or judge_result == 2 or judge_result == 3) then
-        local shadow_types = { Offset_perfect, Offset_cool, Offset_good } -- Indexed by judge_result
+        local offset_perfect = Module:Find("offp")
+        local offset_cool = Module:Find("offg")
+        local offset_good = Module:Find("offm")
+        local shadow_types = { offset_perfect, offset_cool, offset_good } -- Indexed by judge_result
+
         local offset_shadow = Module:Shadow(shadow_types[judge_result], 3000)
-        local offset_x = offset * -1.5 / rush_value
+        local offset_x = offset * -1.5 / Rush_value
         local offset_animation = { p1 = 0.6, p2 = 0, p3 = 0.4, p4 = 0 }
 
         offset_shadow.X = offset_x
