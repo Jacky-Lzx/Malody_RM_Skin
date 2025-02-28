@@ -10,8 +10,8 @@ function Init()
     -- Require version greater than 5.4.62
     local angle = Game:FieldMeta("Angle")
 
-    width = Game:Width()
-    audio_length = Game:AudioLength()
+    local width = Game:Width()
+    local audio_length = Game:AudioLength()
 
     judge_size = Module:GetNumber("Judge Size (0.6-1.4)")
     if (judge_size < 0.6 or judge_size > 1.4) then
@@ -194,13 +194,13 @@ function Init()
         -- end
     end
 
-    offset_indicator = Module:Find("indicator")
+    Offset_indicator = Module:Find("indicator")
     offset_blue = Module:Find("offblue")
     offset_green = Module:Find("offgreen")
     offset_yellow = Module:Find("offyellow")
-    offset_perfect = Module:Find("offp")
-    offset_cool = Module:Find("offg")
-    offset_good = Module:Find("offm")
+    Offset_perfect = Module:Find("offp")
+    Offset_cool = Module:Find("offg")
+    Offset_good = Module:Find("offm")
     offset_bar = Module:Find("offbar")
 
     mod = Module:Find("mod")
@@ -217,6 +217,8 @@ function Init()
             if (mod_str[i] == judge_type[k]) then
                 judge_type_index = k
                 if (k <= 3) then
+                    -- These values are inconsistent with the values in https://zh.moegirl.org.cn/zh/Malody
+                    -- But it is consistent with the offset value in the game (my experiment)
                     value_best = 20 + 8 * k
                     value_cool = 60 + 8 * k
                     value_good = 105 + 8 * k
@@ -227,6 +229,7 @@ function Init()
                 end
             end
         end
+
         if (mod_str[i] == "Dash") then
             rush_value = 1.2
         elseif (mod_str[i] == "Rush") then
@@ -242,16 +245,9 @@ function Init()
     offset_green.Width = 3 * value_cool / rush_value
     offset_yellow.Width = 3 * value_good / rush_value
     offset_bar.Width = 3 * value_good / rush_value + 40
-    soffani = { p1 = 0.6, p2 = 0, p3 = 0.4, p4 = 0 }
-    -- inr = { 3, 3, 3, 3 }
 end
 
 function OnRetry()
-    -- inr = { 3, 3, 3, 3 }
-    -- accvalue = 0
-    -- luaaccvalue = 0
-    -- acc.Text = "0.00"
-    offset_indicator.X = 0
 end
 
 -- 每一帧调用。函数为空时删除函数
@@ -276,32 +272,12 @@ function OnInput()
     end
 end
 
-local function animation_early_or_late(judge_result, offset, time)
-    if (judge_result == 2 or judge_result == 3) then
-        -- local offset = hit_event:Offset() -- offset > 0: early; offset < 0: late
-        if (offset < 0) then
-            slow:DoAlpha({ start = time, finish = time + 300, from = 100, to = 0 });
-        else
-            fast:DoAlpha({ start = time, finish = time + 300, from = 100, to = 0 });
-        end
-    end
-end
-
-local function animation_offset_indicator(judge_result, offset, rush_value, time, offset_indicator)
-    if (judge_result == 1 or judge_result == 2 or judge_result == 3) then
-        indicvalue = offset * -1.5 / rush_value
-        dicx = offset_indicator.X
-        offset_indicator:DoMoveX({ start = time, finish = time + 500, from = dicx, to = indicvalue, ease = 2 })
-    end
-end
-
 -- 玩家击打时调用。函数为空时删除函数
 -- 在Composer中不会被调用
 function OnHit()
     local time = Game:Time()
     local hit_event = Game:HitEvent()
     local offset = hit_event:Offset()
-
     -- judge_result
     --   0: Ignore
     --   1: Best
@@ -310,10 +286,7 @@ function OnHit()
     --   4: Miss
     local judge_result = hit_event:JudgeResult()
 
-    -- if (judge_result ~= 4) then
-    --     combo:DoMoveY({ start = time, finish = time + 100 * rush_value, from = 120, to = 150, ease = 2 })
-    -- end
-
+    -- Animation: judge
     if (judge_result == 1 or judge_result == 2 or judge_result == 3 or judge_result == 4) then
         if (judge_result == 1) then
             perfect_effect:DoResize(
@@ -328,81 +301,33 @@ function OnHit()
         mjudge:DoAlpha({ start = time, finish = time + 600 * rush_value, from = 100, to = 0, custom = { p1 = 0.86, p2 = 0, p3 = 0.59, p4 = -0.11 } })
     end
 
-    animation_offset_indicator(judge_result, offset, rush_value, time, offset_indicator)
-
-    animation_early_or_late(judge_result, offset, time)
-
-    if (judge_result == 1 or judge_result == 2 or judge_result == 3) then
-        local shadow_types = { offset_perfect, offset_cool, offset_good } -- Indexed by judge_result
-        local offset_shadow = Module:Shadow(shadow_types[judge_result], 3000)
-        offset_shadow.X = offset * -1.5 / rush_value
-        if (judge_result == 1) then
-            -- Best
-            offset_shadow:DoAlpha({
-                start = time,
-                finish = time + 3000 * rush_value,
-                from = 100 - math.abs(offset) / 2,
-                to = 0,
-                custom = soffani
-            })
-        elseif (judge_result == 2) then
-            -- Cool
-            offset_shadow:DoAlpha({
-                start = time,
-                finish = time + 1000 * rush_value,
-                from = 100 - math.abs(offset) / 2,
-                to = 0,
-                custom = soffani
-            })
-            if (projudge ~= 1) then
-                for i = 1, 5 do
-                    if (judge_type_index == i) then
-                        if (i <= 3) then
-                            coolpro = 20 + 8 * i
-                        else
-                            coolpro = 44 + 10 * (i - 3)
-                        end
-                        if (math.abs(offset) < coolpro) then
-                            projudge = 1
-                            local value_best = value_best - 9
-                            local value_cool = value_cool - 9
-                            local value_good = value_good - 20
-                            offset_blue.Width = 3 * value_best / rush_value
-                            offset_green.Width = 3 * value_cool / rush_value
-                            offset_yellow.Width = 3 * value_good / rush_value
-                        end
-                    end
-                end
-            end
-        elseif (judge_result == 3) then
-            -- Good
-            offset_shadow:DoAlpha({
-                start = time,
-                finish = time + 1000 * rush_value,
-                from = 100 - math.abs(offset) / 2,
-                to = 0,
-                custom = soffani
-            })
-            if (projudge ~= 1) then
-                for i = 1, 5 do
-                    if (judge_type_index == i) then
-                        if (i <= 3) then
-                            goodpro = 60 + 8 * i
-                        else
-                            goodpro = 84 + 10 * (i - 3)
-                        end
-                        if (math.abs(offset) < goodpro) then
-                            projudge = 1
-                            local value_best = value_best - 9
-                            local value_cool = value_cool - 9
-                            local value_good = value_good - 20
-                            offset_blue.Width = 3 * value_best / rush_value
-                            offset_green.Width = 3 * value_cool / rush_value
-                            offset_yellow.Width = 3 * value_good / rush_value
-                        end
-                    end
-                end
-            end
+    -- Animation: early or late
+    if (judge_result == 2 or judge_result == 3) then
+        -- local offset = hit_event:Offset() -- offset > 0: early; offset < 0: late
+        if (offset < 0) then
+            slow:DoAlpha({ start = time, finish = time + 300, from = 100, to = 0 });
+        else
+            fast:DoAlpha({ start = time, finish = time + 300, from = 100, to = 0 });
         end
+    end
+
+    -- Animation: offset
+    if (judge_result == 1 or judge_result == 2 or judge_result == 3) then
+        local shadow_types = { Offset_perfect, Offset_cool, Offset_good } -- Indexed by judge_result
+        local offset_shadow = Module:Shadow(shadow_types[judge_result], 3000)
+        local offset_x = offset * -1.5 / rush_value
+        local offset_animation = { p1 = 0.6, p2 = 0, p3 = 0.4, p4 = 0 }
+
+        offset_shadow.X = offset_x
+        offset_shadow:DoAlpha({
+            start = time,
+            finish = time + 3000,
+            from = 100,
+            to = 0,
+            custom = offset_animation
+        })
+
+        local indicator_x = Offset_indicator.X
+        Offset_indicator:DoMoveX({ start = time, finish = time + 500, from = indicator_x, to = offset_x, ease = 2 })
     end
 end
