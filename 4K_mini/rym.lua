@@ -56,8 +56,6 @@ function Init()
     trackbg.Height = 1608 * scale * scale_width * imgtrackbgtan / toptan[angle - 29]
     trackbg.Y = (original_height / 2 - 380) * scale * scale_width - trackbg.Height / 1608 * 601
 
-    Judge_size = Module:GetNumber("Judge Size (0.6-1.4)")
-    if (Judge_size < 0.6 or Judge_size > 1.4) then Judge_size = 1 end
 
     local hp_background = Module:Find("hpbg")
     hp_background.Width = width
@@ -237,24 +235,6 @@ function OnHit()
     --   3: Good
     --   4: Miss
     local judge_result = hit_event:JudgeResult()
-
-    -- Animation: judge
-    if (judge_result == 1 or judge_result == 2 or judge_result == 3 or judge_result == 4) then
-        if (judge_result == 1) then
-            local perfect_effect = Module:Find("perfecteffect")
-            perfect_effect:DoResize(
-                { start = time, finish = time + 100 * Rush_value, from = 588 * Judge_size, to = 840 * Judge_size },
-                { start = time, finish = time + 100 * Rush_value, from = 196.7 * Judge_size, to = 281 * Judge_size }
-            )
-            perfect_effect:DoAlpha({ start = time, finish = time + 400 * Rush_value, from = 100, to = 0, custom = { p1 = 0.43, p2 = 0, p3 = 0.17, p4 = -0.11 } })
-        end
-
-        local module_judge = Module:Find("judge")
-        module_judge:DoResize(
-            { start = time, finish = time + 100 * Rush_value, from = 254.8 * Judge_size, to = 364 * Judge_size },
-            { start = time, finish = time + 100, from = 44.8 * Judge_size, to = 64 * Judge_size })
-        module_judge:DoAlpha({ start = time, finish = time + 600 * Rush_value, from = 100, to = 0, custom = { p1 = 0.86, p2 = 0, p3 = 0.59, p4 = -0.11 } })
-    end
 
     -- Animation: early or late
     if (judge_result == 2 or judge_result == 3) then
