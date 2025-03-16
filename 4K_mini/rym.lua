@@ -7,10 +7,10 @@
 
 -- 皮肤初始化时被调用
 function Init()
-    -- Number of keys pressed
-    Press_note_num = 0;
+    Is_note_pressed = { false, false, false, false }
     -- Used for Bongo cat release sprite (If no key is pressed, show the sprite)
-    Bongocat_release = Module:Find("bongocat_release")
+    Bongocat_release_1 = Module:Find("bongocat_release_1")
+    Bongocat_release_2 = Module:Find("bongocat_release_2")
 
     -- Require version greater than 5.4.62
     local angle = Game:FieldMeta("Angle")
@@ -205,7 +205,7 @@ function Init()
 end
 
 function OnRetry()
-    Press_note_num = 0;
+    Is_note_pressed = { false, false, false, false }
 end
 
 -- 每一帧调用。函数为空时删除函数
@@ -221,19 +221,28 @@ function OnInput()
     local time = Game:Time()
 
     -- Some Pressing events are handled in the Composer
-    if (input_type == 1) then -- Press the key
-        Press_note_num = Press_note_num + 1
-        Bongocat_release.Alpha = 0
+    if input_type == 1 then -- Press the key
+        Is_note_pressed[input_x] = true
     end
 
     -- Releasing event is handled here
-    if (input_type == 3) then -- Release the key
+    if input_type == 3 then -- Release the key
         Module_keys[input_x]:DoAlpha({ start = time, finish = time + 450, from = 100, to = 0 })
 
-        Press_note_num = Press_note_num - 1
-        if Press_note_num == 0 then
-            Bongocat_release.Alpha = 100
-        end
+        Is_note_pressed[input_x] = false
+    end
+
+    -- Bongo cat release sprite
+    if Is_note_pressed[1] or Is_note_pressed[2] then
+        Bongocat_release_1.Alpha = 0
+    else
+        Bongocat_release_1.Alpha = 100
+    end
+
+    if Is_note_pressed[3] or Is_note_pressed[4] then
+        Bongocat_release_2.Alpha = 0
+    else
+        Bongocat_release_2.Alpha = 100
     end
 end
 
